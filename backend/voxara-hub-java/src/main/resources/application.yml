@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: voxara-hub
+
+  # ── H2 In-Memory Database ───────────────────────────────────────────────────
+  datasource:
+    url: jdbc:h2:mem:voxaradb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: update           # use 'validate' in production
+    show-sql: false
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        format_sql: true
+
+  # ── H2 Console ────────────────────────────────────────────────────────────────
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # ── File upload limits ────────────────────────────────────────────────────────
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 55MB
+
+server:
+  port: 8080
+
+# ── Voxara custom properties ──────────────────────────────────────────────────
+voxara:
+  jwt:
+    secret: ${JWT_SECRET:VoxaraS3cretK3yF0rJWT2026MustBe256BitsLongAtLeast!!}
+    expiration-ms: 86400000        # 24 hours
+
+  python:
+    base-url: ${PYTHON_URL:http://localhost:8000}
+
+  python-ml-service:
+    url: ${PYTHON_URL:http://localhost:8000}
+
+  storage:
+    upload-dir: ${UPLOAD_DIR:./uploads/audio}
+
+  gamification:
+    points-per-recording: 10
+    streak-bonus-points: 50
+
+  # ── OpenRouter AI Keys (primary / backup waterfall) ───────────────────────
+  openrouter:
+    primary-key: ${OPENROUTER_PRIMARY_KEY:}
+    backup-key:  ${OPENROUTER_BACKUP_KEY:}
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging:
+  level:
+    com.voxara: INFO
+    org.springframework.security: WARN

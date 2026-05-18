@@ -1,0 +1,56 @@
+# ── Java / Maven ──────────────────────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+.mvn/wrapper/maven-wrapper.jar
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+*.so
+
+# ── Environment / Secrets (NEVER commit) ─────────────────────────────────────
+.env
+!.env.example
+
+# ── IDE / Editor ──────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+.DS_Store
+Thumbs.db
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+node_modules/
+dist/
+.next/
+.nuxt/
+
+# ── Uploads (runtime data) ────────────────────────────────────────────────────
+backend/voxara-hub-java/uploads/audio/*.wav
+backend/voxara-hub-java/uploads/audio/*.mp3
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+temp-git/
+*.bak
