@@ -18,6 +18,8 @@ import com.voxara.repository.PatientRepository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.UUID;
 
 /**
  * Patient-facing endpoints — all require JWT.
@@ -43,7 +45,7 @@ public class PatientController {
         return patientRepository.findAll().stream().findFirst().orElseGet(() -> {
             Patient demo = new Patient();
             demo.setName("Hackathon Demo");
-            demo.setEmail("demo@voxara.com");
+            demo.setEmail("guest-" + UUID.randomUUID() + "@voxara.local");
             demo.setPasswordHash("no-password");
             demo.setCondition("parkinsons");
             return patientRepository.save(demo);
@@ -109,17 +111,17 @@ public class PatientController {
     public ResponseEntity<Map<String, Object>> getProfile(
             @AuthenticationPrincipal Patient patient) {
         patient = resolvePatient(patient);
-        return ResponseEntity.ok(Map.of(
-                "id",               patient.getId(),
-                "name",             patient.getName(),
-                "email",            patient.getEmail(),
-                "condition",        patient.getCondition(),
-                "age",              patient.getAge(),
-                "gender",           patient.getGender() != null ? patient.getGender() : "",
-                "currentStreak",    patient.getCurrentStreak(),
-                "totalPoints",      patient.getTotalPoints(),
-                "lastRecordedDate", patient.getLastRecordedDate() != null
-                                    ? patient.getLastRecordedDate().toString() : null
-        ));
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("id", patient.getId());
+        body.put("name", patient.getName());
+        body.put("email", patient.getEmail());
+        body.put("condition", patient.getCondition());
+        body.put("age", patient.getAge());
+        body.put("gender", patient.getGender() != null ? patient.getGender() : "");
+        body.put("currentStreak", patient.getCurrentStreak());
+        body.put("totalPoints", patient.getTotalPoints());
+        body.put("lastRecordedDate", patient.getLastRecordedDate() != null
+                ? patient.getLastRecordedDate().toString() : null);
+        return ResponseEntity.ok(body);
     }
 }

@@ -32,7 +32,7 @@ public class AuthService {
                 .name(req.name())
                 .email(req.email())
                 .passwordHash(passwordEncoder.encode(req.password()))
-                .condition(req.condition())
+                .condition(normalizeCondition(req.condition()))
                 .age(req.age())
                 .gender(req.gender())
                 .build();
@@ -49,5 +49,21 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
         String token = jwtUtils.generateToken(patient);
         return new AuthResponse(token, patient.getEmail(), patient.getName(), patient.getCondition());
+    }
+
+    private String normalizeCondition(String condition) {
+        String key = condition == null ? "" : condition.toLowerCase().trim();
+        if (key.contains("parkinson")) {
+            return "parkinsons";
+        }
+        if (key.contains("stutter") || key.contains("speech") || key.contains("voice")
+                || key.contains("impediment") || key.contains("fluency")) {
+            return "stuttering";
+        }
+        if (key.contains("copd") || key.contains("asthma") || key.contains("pneumonia")
+                || key.contains("bronchitis") || key.contains("respiratory")) {
+            return "respiratory";
+        }
+        return key.isBlank() ? "stuttering" : key;
     }
 }

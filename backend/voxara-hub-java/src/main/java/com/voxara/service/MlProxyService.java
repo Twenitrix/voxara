@@ -20,8 +20,8 @@ import java.io.IOException;
 /**
  * Proxies audio to the Python FastAPI service for ML analysis.
  *
- * Python endpoint: POST /analyze-conversational-audio
- *   Form fields  : audio_file (multipart), disease_type, activity_tag
+ * Python endpoint: POST /analyze-audio
+ *   Form fields  : audio_file (multipart), disease_type
  */
 @Slf4j
 @Service
@@ -32,7 +32,7 @@ public class MlProxyService {
     private String pythonServiceUrl;
 
     /**
-     * Forward a MultipartFile to Python for combined STT + mood + ML analysis.
+     * Forward a MultipartFile to Python for local acoustic ML analysis.
      *
      * @param file         the WAV audio upload
      * @param diseaseType  "parkinsons" or "respiratory"
@@ -64,8 +64,7 @@ public class MlProxyService {
         };
 
         body.add("audio_file", fileAsResource);
-        body.add("disease_type", diseaseType);
-        body.add("activity_tag", "standard");
+        body.add("disease_type", normalizeDiseaseType(diseaseType));
 
         log.info("Forwarding audio to Python: disease={} activity={} size={}B",
                 diseaseType, activityTag, audioBytes.length);
@@ -74,7 +73,7 @@ public class MlProxyService {
         RestTemplate restTemplate = new RestTemplate();
         
         ResponseEntity<MlAnalysisResponse> responseEntity = restTemplate.postForEntity(
-                pythonServiceUrl + "/analyze-conversational-audio",
+                pythonServiceUrl + "/analyze-audio",
                 requestEntity,
                 MlAnalysisResponse.class
         );
@@ -88,5 +87,21 @@ public class MlProxyService {
         log.info("ML result: risk={} mood={} label={}",
                 response.riskScore(), response.moodScore(), response.predictionLabel());
         return response;
+    }
+
+    private String normalizeDiseaseType(String diseaseType) {
+        String key = diseaseType == null ? "" : diseaseType.toLowerCase().trim();
+        if (key.contains("parkinson")) {
+            return "parkinsons";
+        }
+        if (key.contains("stutter") || key.contains("speech") || key.contains("voice")
+                || key.contains("impediment") || key.contains("fluency")) {
+            return "stuttering";
+        }
+        if (key.contains("copd") || key.contains("asthma") || key.contains("pneumonia")
+                || key.contains("bronchitis") || key.contains("respiratory")) {
+            return "respiratory";
+        }
+        return "stuttering";
     }
 }

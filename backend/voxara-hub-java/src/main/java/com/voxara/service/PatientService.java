@@ -53,7 +53,7 @@ public class PatientService {
             patient = patientRepository.findAll().stream().findFirst().orElseGet(() -> {
                 Patient demo = new Patient();
                 demo.setName("Hackathon Demo User");
-                demo.setEmail("demo@voxara.com");
+                demo.setEmail("guest-" + UUID.randomUUID() + "@voxara.local");
                 demo.setPasswordHash("no-password");
                 demo.setCondition("parkinsons");
                 return patientRepository.save(demo);
@@ -81,7 +81,8 @@ public class PatientService {
 
         // 4. Generate AI next-task instruction via OpenRouter (primary → backup → fallback)
         String nextInstructions = openRouterService.generateNextTask(
-                ml.transcribedText(), riskScore);
+                ml.transcribedText() != null ? ml.transcribedText() : "Voice recording analysed locally.",
+                riskScore);
         log.info("[OpenRouter] nextInstructions=\"{}\"", nextInstructions);
 
         // 5. Build and save Recording
@@ -109,7 +110,23 @@ public class PatientService {
         Recording savedEntity = recordingRepository.save(recording);
         log.info("Successfully saved analysis for patient: {}", savedEntity.getId());
 
-        return RecordingResponse.from(recording);
+        RecordingResponse base = RecordingResponse.from(savedEntity);
+        return new RecordingResponse(
+                base.id(),
+                base.date(),
+                base.riskScore(),
+                base.moodScore(),
+                base.predictionLabel(),
+                base.activityType(),
+                base.alertTriggered(),
+                base.pointsEarned(),
+                base.audioFileUrl(),
+                base.sessionTag(),
+                base.transcribedText(),
+                base.nextInstructions(),
+                ml.diseaseType(),
+                ml.features()
+        );
     }
 
     /** Return all recordings for the authenticated patient, newest first. */

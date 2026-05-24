@@ -23,26 +23,27 @@ from __future__ import annotations
 
 import io
 import logging
+import os
 import threading
 from typing import Iterator
 
 import httpx
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
+load_dotenv()
 
 # ─────────────────────────────────────────────────────────────────────────────
-_KEY_POOL: list[str] = [
-    "sk_hy483lkg_EaaXOKm7zOvWmbZR71nVukD4",
-    "sk_b6c9vgv2_jNQweeiblFJimOt53pFEbnNJ",
-    "sk_og14y1qz_LEzvjZs5towLQDuOMKKXeLlP",
-    "sk_t18ts6ow_FSOTCT1roVNQ0Kg3b9U43lo8",
-    "sk_lnlfe103_kctMLF6LOWO7yWVJcPf29Dxb",
-    "sk_2381wxio_K6YlFAVtsxChBlHt3pUOt1E9",
-    "sk_xn7slh9i_NBDuI89ZHoKdq69wvRCox9dw",
-    "sk_7wxkw6hf_5vFOY4Ie9SvvrOpDvKsXJF7D",
-    "sk_97uflmvh_TyuasadOgX1okk1RSiVkXsCV",
-    "sk_hvnj9p5y_UVjaBrTXp43DcCx9Prn8yPGs",
+_env_keys = [
+    key.strip()
+    for key in (
+        os.getenv("SARVAM_API_KEYS")
+        or os.getenv("SARVAM_API_KEY")
+        or ""
+    ).split(",")
+    if key.strip()
 ]
+_KEY_POOL: list[str] = _env_keys
 
 # Status codes that signal quota / rate-limit → rotate key
 _ROTATE_ON_STATUS: frozenset[int] = frozenset({401, 403, 429})

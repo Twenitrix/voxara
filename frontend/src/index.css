@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --font-inter: 'Inter', sans-serif;
+        --background: 36 67% 97%;
+        --foreground: 20 40% 14%;
+        --card: 0 0% 100%;
+        --card-foreground: 20 86% 79%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 20 40% 14%;
+        --primary: 20 57% 61%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 30 40% 93%;
+        --secondary-foreground: 20 40% 14%;
+        --muted: 30 30% 95%;
+        --muted-foreground: 20 25% 45%;
+        --accent: 20 57% 61%;
+        --accent-foreground: 0 94% 50%;
+        --destructive: 5 68% 53%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 25 45% 87%;
+        --input: 25 45% 87%;
+        --ring: 20 57% 61%;
+        --chart-1: 20 57% 61%;
+        --chart-2: 41 53% 53%;
+        --chart-3: 197 37% 24%;
+        --chart-4: 43 74% 66%;
+        --chart-5: 5 68% 53%;
+        --radius: 1rem;
+        --sidebar-background: 36 67% 97%;
+        --sidebar-foreground: 20 40% 14%;
+        --sidebar-primary: 20 57% 61%;
+        --sidebar-primary-foreground: 0 0% 100%;
+        --sidebar-accent: 30 40% 93%;
+        --sidebar-accent-foreground: 20 40% 14%;
+        --sidebar-border: 25 45% 87%;
+        --sidebar-ring: 20 57% 61%;
+        --voxara-primary: 20 57% 61%;
+        --voxara-warm: 30 100% 97%;
+        --voxara-dark: 20 40% 14%;
+    }
+
+    .dark {
+        --background: 207 50% 12%;
+        --foreground: 0 0% 98%;
+        --card: 207 55% 15%;
+        --card-foreground: 0 0% 98%;
+        --popover: 207 55% 15%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 157 100% 48%;
+        --primary-foreground: 207 50% 12%;
+        --secondary: 207 45% 20%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 207 45% 20%;
+        --muted-foreground: 210 10% 60%;
+        --accent: 157 100% 48%;
+        --accent-foreground: 207 50% 12%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 207 40% 25%;
+        --input: 207 40% 25%;
+        --ring: 157 100% 48%;
+        --chart-1: 157 100% 48%;
+        --chart-2: 204 62% 50%;
+        --chart-3: 30 80% 55%;
+        --chart-4: 280 65% 60%;
+        --chart-5: 340 75% 55%;
+        --sidebar-background: 207 50% 12%;
+        --sidebar-foreground: 240 4.8% 95.9%;
+        --sidebar-primary: 157 100% 48%;
+        --sidebar-primary-foreground: 207 50% 12%;
+        --sidebar-accent: 207 40% 20%;
+        --sidebar-accent-foreground: 240 4.8% 95.9%;
+        --sidebar-border: 207 40% 25%;
+        --sidebar-ring: 157 100% 48%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    body {
+        @apply bg-background text-foreground font-inter;
+    }
+}
+
+/* Pulse animation for mic */
+@keyframes pulse-ring {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(1.6);
+        opacity: 0;
+    }
+}
+
+@keyframes gentle-bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+.animate-pulse-ring {
+    animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+.animate-gentle-bounce {
+    animation: gentle-bounce 2s ease-in-out infinite;
+}
+
+/* Sound wave animation */
+@keyframes wave-bar {
+
+    0%,
+    100% {
+        height: 20%;
+    }
+
+    50% {
+        height: 100%;
+    }
+}
+
+.wave-bar {
+    animation: wave-bar 1.2s ease-in-out infinite;
+}
+
+/* Safe area for mobile */
+.safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}

@@ -1,24 +1,49 @@
-# Voxara 🎙️
+<div align="center">
+  <img src="./docs/assets/logo.png.png" alt="Voxara Logo" width="300" />
 
-> **Your Voice Knows Before You Do.**
-
-An innovative AI-powered conversational voice diary that analyzes your voice to predict, track, and manage respiratory conditions (COPD) and early signs of Parkinson's disease.
+  <h1>Voxara: Voice Health Diary</h1>
+  <p><strong>Your Voice Knows before you do.</strong></p>
+  
+  <p>
+    An innovative, AI-powered conversational voice diary that analyzes your voice to predict, track, and manage respiratory conditions (like COPD) and early signs of Parkinson's disease.
+  </p>
+</div>
 
 ---
 
 ## 📖 Overview
 
-Voxara bridges the gap between daily lifestyle and proactive healthcare. By leveraging state-of-the-art machine learning models on brief daily voice interactions, Voxara detects subtle vocal changes over time — effortlessly collecting health data through natural conversation, computing ongoing risk scores, and providing intuitive actionable reports you can share with your healthcare provider.
+Voxara bridges the gap between daily lifestyle and proactive healthcare. By leveraging state-of-the-art machine learning models on brief daily voice interactions, Voxara detects subtle vocal changes over time. It effortlessly collects health data through natural conversation, computes ongoing risk scores, and provides intuitive, actionable reports you can share directly with your healthcare provider.
 
 ---
 
 ## ✨ Key Features
 
-- 🗣️ **Conversational AI Agent** — Log daily feelings, symptoms, and thoughts through a friendly voice interface
-- 🔬 **Voice-Based Health Detection** — ML models analyze vocal biomarkers for Parkinson's & COPD
-- 📊 **Weekly Summaries** — Dashboard with risk scores, alerts, and total recordings
-- 📅 **Daily Breakdowns** — Granular reports with Low / Moderate / High risk classifications
-- 👩‍⚕️ **Doctor Sharing** — Generate comprehensive reports and share with your physician
+- 🗣️ **Conversational AI Agent** — Simply chat with Voxara AI. Log your daily feelings, symptoms, and thoughts through a friendly, natural voice interface.
+- 🔬 **Voice-Based Health Detection** — Proprietary ML models analyze your vocal biomarkers to detect early signs of **Respiratory Diseases (COPD)** and **Parkinson's**.
+- 📊 **Weekly Summaries** — A beautifully designed dashboard that summarizes your overall health status, average risk scores, critical alerts, and total recordings over the week.
+- 📅 **Daily Breakdowns** — Granular daily reports with "Low", "Moderate", and "High" risk classifications.
+- 👩‍⚕️ **Doctor Sharing** — Generate comprehensive reports and easily share them with your physician with the tap of a button.
+
+---
+
+## 📱 App Previews
+
+### 1. Conversational Interface
+Speak naturally with Voxara to log your daily health.
+<img src="./docs/assets/chat.png.png" alt="Chat Interface" width="350"/>
+
+### 2. Dashboard, Reports & Additional Previews
+Track your weekly progress, view granular daily reports, and export your data directly to your healthcare provider.
+
+<div style="display: flex; flex-wrap: wrap; gap: 10px;">
+  <img src="./docs/assets/Screenshot%202026-04-12%20145544.png" width="250"/>
+  <img src="./docs/assets/Screenshot%202026-04-12%20145552.png" width="250"/>
+  <img src="./docs/assets/Screenshot%202026-04-12%20145625.png" width="250"/>
+  <img src="./docs/assets/Screenshot%202026-04-12%20145713.png" width="250"/>
+  <img src="./docs/assets/Screenshot%202026-04-12%20145727.png" width="250"/>
+  <img src="./docs/assets/Screenshot%202026-04-12%20150040.png" width="250"/>
+</div>
 
 ---
 
@@ -34,7 +59,7 @@ Voxara bridges the gap between daily lifestyle and proactive healthcare. By leve
 
 ## 📂 Project Structure
 
-```
+```text
 voxara/
 ├── backend/
 │   ├── voxara-hub-java/        # Spring Boot API hub (port 8080)

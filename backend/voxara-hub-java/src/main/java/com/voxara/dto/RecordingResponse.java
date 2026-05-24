@@ -4,6 +4,7 @@ import com.voxara.entity.Recording;
 import com.voxara.entity.SessionTag;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -21,7 +22,9 @@ public record RecordingResponse(
     String        audioFileUrl,
     SessionTag    sessionTag,
     String        transcribedText,
-    String        nextInstructions
+    String        nextInstructions,
+    String        diseaseType,
+    Map<String, Double> acousticFeatures
 ) {
     /** Factory method — converts a Recording entity to this DTO. */
     public static RecordingResponse from(Recording r) {
@@ -37,7 +40,9 @@ public record RecordingResponse(
             r.getAudioFileUrl(),
             r.getSessionTag(),
             r.getTranscribedText(),
-            r.getNextInstructions()
+            r.getNextInstructions(),
+            null,
+            null
         );
     }
 }

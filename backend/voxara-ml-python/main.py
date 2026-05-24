@@ -28,6 +28,8 @@ import traceback
 from contextlib import asynccontextmanager
 from typing import Annotated, Any
 
+import librosa
+import numpy as np
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -59,7 +61,7 @@ logging.basicConfig(
 logger = logging.getLogger("voxara.main")
 
 # ── Allowed disease types ─────────────────────────────────────────────────────
-SUPPORTED_DISEASE_TYPES = {"parkinsons", "respiratory"}
+SUPPORTED_DISEASE_TYPES = {"parkinsons", "respiratory", "stuttering"}
 
 # ─────────────────────────────────────────────────────────────────────────────
 @asynccontextmanager
@@ -165,6 +167,91 @@ class AudioAnalysisResponse(BaseModel):
     )
     features: dict[str, Any] = Field(
         ..., description="Dictionary of the 20 extracted acoustic features."
+    )
+
+
+def _clamp_score(value: float) -> float:
+    return round(float(max(0.0, min(100.0, value))), 2)
+
+
+def predict_stuttering_risk(y: np.ndarray, sr: int, features: AudioFeatures) -> PredictionResult:
+    """
+    Rule-based stuttering/disfluency score for the hackathon demo.
+
+    There is no trained stuttering model in this repository, so this path is
+    deliberately separate from the Parkinsons/respiratory classifiers. It uses
+    acoustic correlates of disfluency: pauses, voiced/unvoiced fragmentation,
+    pitch instability, amplitude instability, and energy variance.
+    """
+    duration = max(len(y) / sr, 0.001)
+    rms = librosa.feature.rms(y=y, frame_length=1024, hop_length=256)[0]
+    if rms.size == 0 or float(rms.max()) <= 1e-8:
+        return PredictionResult(
+            risk_score=0.0,
+            prediction_label="Low Stuttering Risk",
+            probability_confidence=100.0,
+        )
+
+    threshold = float(rms.max()) * 0.12
+    silent = rms < threshold
+    frame_seconds = 256 / sr
+
+    pause_runs: list[int] = []
+    current = 0
+    for is_silent in silent:
+        if is_silent:
+            current += 1
+        elif current:
+            pause_runs.append(current)
+            current = 0
+    if current:
+        pause_runs.append(current)
+
+    long_pause_count = sum(1 for run in pause_runs if run * frame_seconds >= 0.25)
+    transitions = int(np.count_nonzero(np.diff(silent.astype(np.int8))))
+    voiced_segments = max(1, transitions // 2)
+    energy_cv = float(np.std(rms) / max(np.mean(rms), 1e-8))
+
+    pause_ratio_score = _clamp_score(features.pause_ratio * 260)
+    long_pause_score = _clamp_score((long_pause_count / duration) * 85)
+    fragmentation_score = _clamp_score((voiced_segments / duration) * 38)
+    jitter_score = _clamp_score(features.jitter * 1800)
+    shimmer_score = _clamp_score(features.shimmer * 650)
+    energy_score = _clamp_score(energy_cv * 45)
+
+    risk = _clamp_score(
+        pause_ratio_score * 0.28
+        + long_pause_score * 0.23
+        + fragmentation_score * 0.20
+        + jitter_score * 0.14
+        + shimmer_score * 0.10
+        + energy_score * 0.05
+    )
+
+    if risk >= 70:
+        label = "High Stuttering Risk"
+    elif risk >= 40:
+        label = "Moderate Stuttering Risk"
+    else:
+        label = "Low Stuttering Risk"
+
+    flat = features.to_flat_dict()
+    flat.update({
+        "stutter_pause_score": pause_ratio_score,
+        "stutter_long_pause_score": long_pause_score,
+        "stutter_fragmentation_score": fragmentation_score,
+        "stutter_jitter_score": jitter_score,
+        "stutter_shimmer_score": shimmer_score,
+        "stutter_energy_score": energy_score,
+        "stutter_long_pause_count": float(long_pause_count),
+        "stutter_voiced_segments": float(voiced_segments),
+    })
+    setattr(features, "_stuttering_flat_features", flat)
+
+    return PredictionResult(
+        risk_score=risk,
+        prediction_label=label,
+        probability_confidence=_clamp_score(max(risk, 100 - risk)),
     )
 
 
@@ -315,32 +402,36 @@ async def analyze_audio(
             detail=f"Feature extraction failed: {exc}",
         ) from exc
 
-    # --- Step 3: Load model bundle -------------------------------------------
-    try:
-        bundle = get_bundle(disease_key)
-    except KeyError:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=(
-                f"Model for '{disease_key}' is not loaded. "
-                "Check server logs for loading errors."
-            ),
-        )
+    # --- Step 3: Predict risk ------------------------------------------------
+    if disease_key == "stuttering":
+        result = predict_stuttering_risk(y, sr, features)
+        response_features = getattr(features, "_stuttering_flat_features", features.to_flat_dict())
+    else:
+        try:
+            bundle = get_bundle(disease_key)
+        except KeyError:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=(
+                    f"Model for '{disease_key}' is not loaded. "
+                    "Check server logs for loading errors."
+                ),
+            )
 
-    # --- Step 4: Predict risk ------------------------------------------------
-    try:
-        result: PredictionResult = predict_risk(features, bundle)
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(exc),
-        ) from exc
-    except RuntimeError as exc:
-        logger.error("Prediction error: %s", exc, exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(exc),
-        ) from exc
+        try:
+            result = predict_risk(features, bundle)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=str(exc),
+            ) from exc
+        except RuntimeError as exc:
+            logger.error("Prediction error: %s", exc, exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(exc),
+            ) from exc
+        response_features = features.to_flat_dict()
 
     # --- Build and return response -------------------------------------------
     return AudioAnalysisResponse(
@@ -348,7 +439,7 @@ async def analyze_audio(
         risk_score=result.risk_score,
         prediction_label=result.prediction_label,
         probability_confidence=result.probability_confidence,
-        features=features.to_flat_dict(),
+        features=response_features,
     )
 
 

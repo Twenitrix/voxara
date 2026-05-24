@@ -48,8 +48,7 @@ dist/
 .nuxt/
 
 # ── Uploads (runtime data) ────────────────────────────────────────────────────
-backend/voxara-hub-java/uploads/audio/*.wav
-backend/voxara-hub-java/uploads/audio/*.mp3
+backend/voxara-hub-java/uploads/
 
 # ── Misc ──────────────────────────────────────────────────────────────────────
 temp-git/
